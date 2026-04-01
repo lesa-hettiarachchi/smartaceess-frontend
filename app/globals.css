@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc; /* slate-50 */
-  --foreground: #0f172a; /* slate-900 */
+  --background: #f8fafc;
+  /* slate-50 */
+  --foreground: #0f172a;
+  /* slate-900 */
 }
 
 @theme inline {
@@ -21,15 +23,19 @@ body {
   .glass {
     @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.04)];
   }
+
   .glass-card {
     @apply bg-white/80 backdrop-blur-xl border border-white/50 shadow-[0_4px_24px_0_rgba(0,0,0,0.03)] transition-all duration-300;
   }
+
   .glass-card-hover {
     @apply hover:shadow-[0_8px_30px_0_rgba(0,0,0,0.06)] hover:-translate-y-1;
   }
+
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600;
   }
+
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200;
   }
