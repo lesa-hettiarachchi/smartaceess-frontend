@@ -1,6 +1,6 @@
 "use client";
 
-import { Upload } from "lucide-react";
+import { Upload, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -10,6 +10,7 @@ export default function HomePage() {
   const [locationType, setLocationType] = useState("");
   const [reportName, setReportName] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
 
   const handleGenerate = () => {
     if (!file) {
@@ -32,25 +33,37 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f6fb] p-8">
-      <h2 className="text-[24px] font-bold mb-8">Generate New Report</h2>
+    <div className="p-10 max-w-6xl mx-auto">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Generate New Report</h2>
+        <p className="text-slate-500 mt-2 text-lg">Upload an image to start an accessibility audit.</p>
+      </div>
 
-      <div className="bg-[#e9eef7] rounded-[24px] p-8">
-        <div className="grid grid-cols-[1.7fr_0.8fr] gap-8 items-stretch">
-          <div className="bg-white rounded-[24px] p-8">
-            <h3 className="text-[18px] font-semibold mb-2">Source Material</h3>
-            <p className="text-gray-500 mb-6">
-              Upload the image, you want to base the report on.
+      <div className="glass-card rounded-[32px] p-8">
+        <div className="grid grid-cols-[1.5fr_1fr] gap-10 items-stretch">
+          <div className="flex flex-col">
+            <h3 className="text-lg font-semibold mb-1 text-slate-800">Source Material</h3>
+            <p className="text-slate-500 mb-6 text-sm">
+              Upload the image or document you want to base the report on.
             </p>
 
-            <div className="border-2 border-dashed border-gray-300 rounded-[20px] min-h-[480px] flex flex-col items-center justify-center text-center px-6">
-              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-5">
-                <Upload className="text-blue-600" size={28} />
+            <div 
+              className={`flex-1 border-2 border-dashed rounded-[24px] flex flex-col items-center justify-center text-center px-6 transition-all duration-300 min-h-[460px] relative overflow-hidden group ${
+                isHovering ? "border-indigo-400 bg-indigo-50/50" : "border-slate-300 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300"
+              }`}
+              onDragOver={(e) => { e.preventDefault(); setIsHovering(true); }}
+              onDragLeave={() => setIsHovering(false)}
+              onDrop={(e) => { e.preventDefault(); setIsHovering(false); setFile(e.dataTransfer.files?.[0] || null); }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-100/20 to-purple-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <div className="w-20 h-20 rounded-full bg-white shadow-sm flex items-center justify-center mb-6 relative z-10 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                <Upload className="text-indigo-500" size={32} />
               </div>
 
-              <p className="text-[18px] mb-2">Click to upload or drag and drop</p>
+              <p className="text-xl font-medium text-slate-700 mb-2 relative z-10">Click to upload or drag and drop</p>
 
-              <p className="text-sm text-gray-400 mb-6">
+              <p className="text-sm text-slate-400 mb-8 relative z-10 font-medium">
                 SVG, PNG, JPG or PDF (max. 10MB)
               </p>
 
@@ -64,55 +77,70 @@ export default function HomePage() {
 
               <label
                 htmlFor="fileUpload"
-                className="border border-gray-300 px-5 py-2 rounded-lg cursor-pointer bg-white hover:bg-gray-50"
+                className="bg-white border border-slate-200 text-slate-700 px-6 py-2.5 rounded-full font-medium cursor-pointer hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200 relative z-10"
               >
                 Browse Files
               </label>
 
               {file && (
-                <p className="mt-4 text-sm text-green-600 font-medium">
-                  Selected: {file.name}
-                </p>
+                <div className="mt-6 px-4 py-2 bg-green-50 rounded-xl border border-green-100 relative z-10 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <p className="text-sm text-green-700 font-medium truncate max-w-[200px]">
+                    {file.name}
+                  </p>
+                </div>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col justify-between">
+          <div className="flex flex-col justify-between pl-2">
             <div>
-              <label className="block text-[16px] font-semibold mb-3">
-                Location Type <span className="text-red-500">*</span>
-              </label>
+              <div className="mb-8">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Location Type <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={locationType}
+                    onChange={(e) => setLocationType(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 bg-white/60 px-5 py-4 outline-none focus-ring text-slate-700 appearance-none shadow-sm cursor-pointer transition-all"
+                  >
+                    <option value="" disabled>Select transportation type...</option>
+                    <option value="bus-stop">Bus Stop</option>
+                    <option value="train-platform">Train Platform</option>
+                    <option value="tram-stop">Tram Stop</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-500">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                  </div>
+                </div>
+              </div>
 
-              <select
-                value={locationType}
-                onChange={(e) => setLocationType(e.target.value)}
-                className="w-full rounded-[14px] border border-gray-300 bg-white px-4 py-4 mb-10 outline-none"
-              >
-                <option value="">--- Select Type ---</option>
-                <option value="bus-stop">Bus Stop</option>
-                <option value="train-platform">Train Platform</option>
-                <option value="tram-stop">Tram Stop</option>
-              </select>
-
-              <label className="block text-[16px] font-semibold mb-3">
-                Report Name <span className="text-red-500">*</span>
-              </label>
-
-              <input
-                value={reportName}
-                onChange={(e) => setReportName(e.target.value)}
-                className="w-full rounded-[14px] border border-gray-300 bg-white px-4 py-4 outline-none"
-                placeholder="Enter report name"
-              />
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Report Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={reportName}
+                  onChange={(e) => setReportName(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 bg-white/60 px-5 py-4 outline-none focus-ring text-slate-700 shadow-sm transition-all"
+                  placeholder="E.g., Central Station Platform 2"
+                />
+              </div>
             </div>
 
-            <div className="flex justify-end pt-10">
+            <div className="pt-8 mt-auto">
               <button
                 onClick={handleGenerate}
-                className="bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white font-semibold px-10 py-4 rounded-[18px] shadow-sm hover:opacity-95"
+                className="w-full relative group overflow-hidden rounded-2xl p-[1px] shadow-md hover:shadow-lg transition-all duration-300"
               >
-                Generate
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative bg-white/10 backdrop-blur-sm flex items-center justify-center gap-2 text-white font-semibold text-lg px-8 py-4 rounded-2xl transition-transform duration-300">
+                  <Sparkles size={20} className="text-white/90" />
+                  <span>Generate AI Report</span>
+                </div>
               </button>
+              <p className="text-center text-xs text-slate-400 mt-4 font-medium">Estimated AI processing time: ~45s</p>
             </div>
           </div>
         </div>

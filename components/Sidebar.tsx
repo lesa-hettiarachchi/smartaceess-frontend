@@ -9,28 +9,33 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const navItemClass = (active: boolean) =>
-    `flex items-center gap-3 px-4 py-3 rounded-xl transition font-medium ${
+    `flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 font-medium ${
       active
-        ? "bg-blue-100 text-blue-700 shadow-sm"
-        : "text-gray-700 hover:bg-white/70"
+        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 translate-x-1"
+        : "text-slate-600 hover:bg-white/80 hover:text-indigo-600 hover:translate-x-1"
     }`;
 
   return (
-    <div className="w-[250px] min-h-screen bg-[#edf2fb] border-r border-gray-200 p-6 flex flex-col">
-      <div className="flex flex-col items-center mb-10">
-        <Image
-          src="/logo.png"
-          alt="SmartAccess Logo"
-          width={90}
-          height={90}
-          className="rounded-full mb-3 object-cover"
-        />
-        <h1 className="text-3xl font-bold text-gray-800">SmartAccess</h1>
+    <div className="w-[280px] min-h-screen glass border-r border-slate-200/50 p-6 flex flex-col relative z-10">
+      <div className="flex flex-col items-center mb-12 mt-6 space-y-4">
+        <div className="relative group">
+          <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+          <Image
+            src="/logo.png"
+            alt="SmartAccess Logo"
+            width={85}
+            height={85}
+            className="relative rounded-full object-cover border-[3px] border-white shadow-sm"
+          />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+          Smart<span className="text-indigo-600">Access</span>
+        </h1>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2 relative">
         <Link href="/" className={navItemClass(pathname === "/")}>
-          <FileText size={20} />
+          <FileText size={20} className={pathname === "/" ? "text-white" : "text-indigo-400"} />
           Generate Report
         </Link>
 
@@ -40,9 +45,18 @@ export default function Sidebar() {
             pathname === "/reports" || pathname.startsWith("/reports/")
           )}
         >
-          <FolderOpen size={20} />
+          <FolderOpen size={20} className={pathname.startsWith("/reports/") || pathname === "/reports" ? "text-white" : "text-indigo-400"} />
           My Reports
         </Link>
+      </div>
+
+      <div className="mt-auto pb-4">
+        <div className="glass-card rounded-2xl p-4 text-center">
+          <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+            AI Audit Tool
+          </p>
+          <div className="h-1 w-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full mx-auto mt-3"></div>
+        </div>
       </div>
     </div>
   );
