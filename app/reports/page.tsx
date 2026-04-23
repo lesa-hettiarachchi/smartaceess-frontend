@@ -1,43 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Download, TriangleAlert, FileSymlink, ChevronRight } from "lucide-react";
-import { reports } from "../../data/reports";
+import { getReports, type ReportSummary } from "../../lib/api";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export default function ReportsPage() {
-  const handleDownload = (report: (typeof reports)[number]) => {
-    const content = `
-Report Name: ${report.name}
-Detected: ${report.detected}/10
-Needs Measurement: ${report.needsMeasurement}/10
-Manual Inspection: ${report.manualInspection}/10
+  const [reports, setReports] = useState<ReportSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-Detailed Items:
-${
-  report.items.length > 0
-    ? report.items
-        .map(
-          (item, index) =>
-            `${index + 1}. ${item.title}
-Clause: ${item.clause}
-Status: ${item.statusText}
-Result: ${item.result}
-Type: ${item.type}
-`
-        )
-        .join("\n")
-    : "No detailed items available."
-}
-    `.trim();
+  useEffect(() => {
+    getReports()
+      .then(setReports)
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
 
-    const blob = new Blob([content], { type: "text/plain" });
+  const handleDownload = async (report: ReportSummary) => {
+    const res = await fetch(`${API_URL}/reports/${report.id}/export`);
+    const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${report.id}.txt`;
+    a.download = `${report.report_name}_${report.audit_date}.json`;
     a.click();
-
     URL.revokeObjectURL(url);
   };
 
@@ -49,6 +37,14 @@ Type: ${item.type}
           <p className="text-slate-500 mt-2 text-md md:text-lg text-center md:text-left">View and manage your recent audits.</p>
         </div>
       </div>
+
+      {isLoading && (
+        <p className="text-slate-400 text-center py-16">Loading reports...</p>
+      )}
+
+      {!isLoading && reports.length === 0 && (
+        <p className="text-slate-400 text-center py-16">No reports yet. Generate your first audit.</p>
+      )}
 
       <div className="grid grid-cols-1 gap-5 md:gap-6">
         {reports.map((report) => (
@@ -63,14 +59,14 @@ Type: ${item.type}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-lg md:text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
-                    {report.name}
+                    {report.report_name}
                   </h3>
                   <div className="flex flex-wrap items-center gap-2 mt-1">
                     <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px] md:text-xs font-semibold">
                       ID: {report.id}
                     </span>
                     <span className="text-sm text-slate-400 hidden sm:inline">•</span>
-                    <span className="text-[13px] md:text-sm text-slate-500 font-medium">10 metrics</span>
+                    <span className="text-[13px] md:text-sm text-slate-500 font-medium">{report.audit_date}</span>
                   </div>
                 </div>
               </Link>
@@ -79,14 +75,14 @@ Type: ${item.type}
             <div className="flex justify-between md:justify-start gap-4 sm:gap-8 md:gap-10 px-2 md:px-8 border-y md:border-y-0 md:border-x border-slate-200/50 py-4 md:py-0 w-full xl:w-auto">
               <div className="text-center flex-1 md:flex-none">
                 <p className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
-                  {report.detected}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
+                  {report.detected_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
                 </p>
                 <p className="text-slate-500 font-bold text-[9px] md:text-[10px] uppercase tracking-wider mt-1 md:mt-1.5 line-clamp-1">Detected</p>
               </div>
 
               <div className="text-center flex-1 md:flex-none">
                 <p className="text-2xl md:text-3xl font-bold text-amber-500 tracking-tight">
-                  {report.needsMeasurement}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
+                  {report.needs_measure_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
                 </p>
                 <p className="text-slate-500 font-bold text-[9px] md:text-[10px] uppercase tracking-wider mt-1 md:mt-1.5 line-clamp-1">
                   Needs Measure
@@ -95,7 +91,7 @@ Type: ${item.type}
 
               <div className="text-center flex-1 md:flex-none">
                 <p className="text-2xl md:text-3xl font-bold text-blue-500 tracking-tight">
-                  {report.manualInspection}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
+                  {report.manual_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
                 </p>
                 <p className="text-slate-500 font-bold text-[9px] md:text-[10px] uppercase tracking-wider mt-1 md:mt-1.5 line-clamp-1">
                   Manual Insp.
@@ -104,7 +100,7 @@ Type: ${item.type}
             </div>
 
             <div className="flex flex-wrap items-center justify-between xl:justify-end gap-3 xl:pl-2 w-full xl:w-auto">
-              {report.needsMeasurement > 0 && (
+              {report.needs_measure_count > 0 && (
                 <Link
                   href={`/measure/${report.id}`}
                   className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-amber-50 text-amber-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-amber-100 transition-colors border border-amber-200/70 text-sm"
@@ -113,7 +109,7 @@ Type: ${item.type}
                   Measure
                 </Link>
               )}
-              
+
               <button
                 onClick={() => handleDownload(report)}
                 className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-semibold hover:bg-slate-50 hover:border-slate-300 transition-colors text-sm shadow-sm"

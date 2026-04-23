@@ -3,6 +3,7 @@
 import { Upload, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { submitAudit } from "../lib/api";
 
 export default function HomePage() {
   const router = useRouter();
@@ -11,10 +12,11 @@ export default function HomePage() {
   const [reportName, setReportName] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isHovering, setIsHovering] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!file) {
-      alert("Please select an image or PDF file.");
+      alert("Please select a jpg, png, or pdf file.");
       return;
     }
 
@@ -22,14 +24,21 @@ export default function HomePage() {
       alert("Please select a location type.");
       return;
     }
-
+ 
     if (!reportName.trim()) {
       alert("Please enter a report name.");
       return;
     }
 
-    alert("Frontend only: report generated successfully.");
-    router.push("/reports");
+    setIsLoading(true);
+    try {
+      const result = await submitAudit(file, locationType, reportName);
+      router.push(`/reports/${result.id}`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Audit failed. Is the backend running?");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,7 +78,7 @@ export default function HomePage() {
 
               <input
                 type="file"
-                accept="image/*,.pdf"
+                accept="image/jpeg,image/png,application/pdf"
                 id="fileUpload"
                 className="hidden"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
@@ -106,9 +115,10 @@ export default function HomePage() {
                     className="w-full rounded-[16px] md:rounded-2xl border border-slate-200 bg-white/60 px-5 py-4 outline-none focus-ring text-slate-700 appearance-none shadow-sm cursor-pointer transition-all text-sm md:text-base"
                   >
                     <option value="" disabled>Select transportation type...</option>
-                    <option value="bus-stop">Bus Stop</option>
-                    <option value="train-platform">Train Platform</option>
-                    <option value="tram-stop">Tram Stop</option>
+                    <option value="bus_stop">Bus Stop</option>
+                    <option value="railway_platform">Railway Platform</option>
+                    <option value="tram_stop">Tram Stop</option>
+                    <option value="station_entrance">Station Entrance</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-500">
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -132,12 +142,13 @@ export default function HomePage() {
             <div className="pt-4 md:pt-8 mt-auto">
               <button
                 onClick={handleGenerate}
-                className="w-full relative group overflow-hidden rounded-[16px] md:rounded-2xl p-[1px] shadow-sm hover:shadow-lg transition-all duration-300"
+                disabled={isLoading}
+                className="w-full relative group overflow-hidden rounded-[16px] md:rounded-2xl p-[1px] shadow-sm hover:shadow-lg transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-[16px] md:rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative bg-white/10 backdrop-blur-sm flex items-center justify-center gap-2 text-white font-semibold text-base md:text-lg px-8 py-3.5 md:py-4 rounded-[16px] md:rounded-2xl transition-transform duration-300 active:scale-95 group-hover:scale-[0.99] md:group-hover:scale-[0.98]">
                   <Sparkles size={18} className="text-white/90" />
-                  <span>Generate Report</span>
+                  <span>{isLoading ? "Running Audit..." : "Generate Report"}</span>
                 </div>
               </button>
               <p className="text-center text-xs text-slate-400 mt-3 md:mt-4 font-medium hidden sm:block">Estimated AI processing time: ~45s</p>
