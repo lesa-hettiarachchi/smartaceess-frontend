@@ -24,7 +24,7 @@ export default function ReportsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${report.report_name}_${report.audit_date}.json`;
+    a.download = `${report.report_name}_${report.audit_date}.pdf`;
     a.click();
     URL.revokeObjectURL(url);
   };

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Check, TriangleAlert, X, ArrowLeft } from "lucide-react";
+import { Check, TriangleAlert, X, ArrowLeft, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { getReport } from "../../../lib/api";
 
@@ -63,6 +63,31 @@ export default async function ReportDetailsPage({
           </div>
         </div>
       </div>
+
+      {data.violations && data.violations.length > 0 && (
+        <div className="mb-6 space-y-3">
+          {data.violations.map((v, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 rounded-2xl p-4 md:p-5"
+            >
+              <div className="shrink-0 w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center mt-0.5">
+                <ShieldAlert className="text-rose-600" size={20} />
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-rose-800 text-sm md:text-base">
+                  Potential DSAPT Violation
+                  <span className="ml-2 px-2 py-0.5 bg-rose-100 text-rose-700 rounded text-[10px] font-bold uppercase tracking-wider border border-rose-200">
+                    Critical
+                  </span>
+                </p>
+                <p className="text-xs md:text-sm font-semibold text-rose-600 mt-1">{v.dsapt_clause}</p>
+                <p className="text-sm text-rose-700 mt-1 leading-relaxed">{v.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="glass-card rounded-[24px] md:rounded-[32px] p-4 sm:p-6 md:p-8 space-y-4">
         {items.length === 0 ? (

@@ -20,6 +20,11 @@ export default function HomePage() {
       return;
     }
 
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File is too large. Maximum size is 10 MB.");
+      return;
+    }
+
     if (!locationType) {
       alert("Please select a location type.");
       return;
