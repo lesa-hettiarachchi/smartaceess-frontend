@@ -37,6 +37,7 @@ export type ReportDetail = {
   missing: ReportItem[];
   needs_inspection: ReportItem[];
   violations: { rule: string; dsapt_clause: string; description: string; severity: string }[];
+  annotated_image_base64?: string;
 };
 
 export type MeasureData = {

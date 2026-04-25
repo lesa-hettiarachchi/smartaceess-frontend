@@ -1,9 +1,11 @@
 "use client";
 
-import { Upload, Sparkles } from "lucide-react";
+import { Upload, Sparkles, WifiOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { submitAudit } from "../lib/api";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export default function HomePage() {
   const router = useRouter();
@@ -13,6 +15,13 @@ export default function HomePage() {
   const [file, setFile] = useState<File | null>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [backendOk, setBackendOk] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_URL}/health`)
+      .then((r) => setBackendOk(r.ok))
+      .catch(() => setBackendOk(false));
+  }, []);
 
   const handleGenerate = async () => {
     if (!file) {
@@ -48,6 +57,15 @@ export default function HomePage() {
 
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto">
+      {backendOk === false && (
+        <div className="mb-6 flex items-center gap-3 bg-rose-50 border border-rose-200 rounded-2xl px-5 py-4">
+          <WifiOff className="shrink-0 text-rose-500" size={20} />
+          <p className="text-rose-700 font-medium text-sm md:text-base">
+            Audit service unavailable — please try again later.
+          </p>
+        </div>
+      )}
+
       <div className="mb-6 md:mb-8 text-center md:text-left">
         <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Generate New Report</h2>
         <p className="text-slate-500 mt-2 text-md md:text-lg">Upload an image to start an accessibility audit.</p>
@@ -121,9 +139,7 @@ export default function HomePage() {
                   >
                     <option value="" disabled>Select transportation type...</option>
                     <option value="bus_stop">Bus Stop</option>
-                    <option value="railway_platform">Railway Platform</option>
                     <option value="tram_stop">Tram Stop</option>
-                    <option value="station_entrance">Station Entrance</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-500">
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
