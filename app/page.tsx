@@ -4,6 +4,7 @@ import { Upload, Sparkles, WifiOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { submitAudit } from "../lib/api";
+import AuditLoadingOverlay from "../components/AuditLoadingOverlay";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -56,6 +57,8 @@ export default function HomePage() {
   };
 
   return (
+    <>
+    {isLoading && <AuditLoadingOverlay />}
     <div className="p-6 md:p-10 max-w-6xl mx-auto">
       {backendOk === false && (
         <div className="mb-6 flex items-center gap-3 bg-rose-50 border border-rose-200 rounded-2xl px-5 py-4">
@@ -178,5 +181,6 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
