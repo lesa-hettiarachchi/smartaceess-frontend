@@ -75,14 +75,14 @@ export default function ReportsPage() {
             <div className="flex justify-between md:justify-start gap-4 sm:gap-8 md:gap-10 px-2 md:px-8 border-y md:border-y-0 md:border-x border-slate-200/50 py-4 md:py-0 w-full xl:w-auto">
               <div className="text-center flex-1 md:flex-none">
                 <p className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
-                  {report.detected_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
+                  {report.detected_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/7</span>
                 </p>
                 <p className="text-slate-500 font-bold text-[9px] md:text-[10px] uppercase tracking-wider mt-1 md:mt-1.5 line-clamp-1">Detected</p>
               </div>
 
               <div className="text-center flex-1 md:flex-none">
                 <p className="text-2xl md:text-3xl font-bold text-amber-500 tracking-tight">
-                  {report.needs_measure_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
+                  {report.needs_measure_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/7</span>
                 </p>
                 <p className="text-slate-500 font-bold text-[9px] md:text-[10px] uppercase tracking-wider mt-1 md:mt-1.5 line-clamp-1">
                   Needs Measure
@@ -91,7 +91,7 @@ export default function ReportsPage() {
 
               <div className="text-center flex-1 md:flex-none">
                 <p className="text-2xl md:text-3xl font-bold text-blue-500 tracking-tight">
-                  {report.manual_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/10</span>
+                  {report.manual_count}<span className="text-slate-400 text-sm md:text-lg font-medium">/7</span>
                 </p>
                 <p className="text-slate-500 font-bold text-[9px] md:text-[10px] uppercase tracking-wider mt-1 md:mt-1.5 line-clamp-1">
                   Manual Insp.
