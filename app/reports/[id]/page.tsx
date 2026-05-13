@@ -43,16 +43,24 @@ export default async function ReportDetailsPage({
     notFound();
   }
 
+  // Classes in needs_inspection always show yellow — even if also in detected[].
+  // detected[] drives the compliance score; needs_inspection[] drives the display.
+  // If a class is in both (dual-bucket), only show the yellow entry to avoid
+  // showing the same feature as both green and yellow at the same time.
+  const inspectionClasses = new Set(data.needs_inspection.map((i) => i.class));
+
   const items = [
-    ...data.detected.map((i) => ({
-      title: fmt(i.class),
-      clause: (i.sections ?? []).join(", "),
-      statusText: i.description,
-      confidence: i.confidence,
-      result: "Detected",
-      type: "green" as const,
-      inspectionItems: [] as string[],
-    })),
+    ...data.detected
+      .filter((i) => !inspectionClasses.has(i.class))   // skip — shown as yellow below
+      .map((i) => ({
+        title: fmt(i.class),
+        clause: (i.sections ?? []).join(", "),
+        statusText: i.description,
+        confidence: i.confidence,
+        result: "Detected",
+        type: "green" as const,
+        inspectionItems: [] as string[],
+      })),
     ...data.needs_inspection.map((i) => ({
       title: fmt(i.class),
       clause: (i.sections ?? []).join(", "),
