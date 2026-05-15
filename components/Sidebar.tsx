@@ -10,110 +10,156 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Close sidebar on navigation on mobile
+  // Close sidebar on navigation (mobile)
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
 
-  const navItemClass = (active: boolean) =>
-    `flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 font-medium ${
-      active
-        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 md:translate-x-1"
-        : "text-slate-600 hover:bg-white/80 hover:text-indigo-600 md:hover:translate-x-1"
-    }`;
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
+  const navItems = [
+    { href: "/", label: "Generate Report", Icon: FileText, isActive: pathname === "/" },
+    {
+      href: "/reports",
+      label: "My Reports",
+      Icon: FolderOpen,
+      isActive: pathname === "/reports" || pathname.startsWith("/reports/"),
+    },
+  ];
 
   return (
     <>
-      {/* Mobile Topbar */}
-      <div className="md:hidden glass backdrop-blur-3xl border-b border-white/50 p-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
-        <div className="flex items-center gap-3">
+      {/* ── Mobile Top Bar ─────────────────────────────────────────────────── */}
+      <div className="md:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
+        <div className="flex items-center gap-2.5">
           <Image
             src="/logo.png"
             alt="SmartAccess Logo"
-            width={40}
-            height={40}
-            className="rounded-full object-cover border-[2px] border-white shadow-sm -translate-y-0.5"
+            width={34}
+            height={34}
+            className="rounded-full object-cover ring-2 ring-white shadow-sm"
           />
-          <h1 className="text-xl font-bold tracking-tight text-slate-800 mt-1">
+          <h1 className="text-lg font-bold tracking-tight text-slate-800">
             Smart<span className="text-indigo-600">Access</span>
           </h1>
         </div>
-        <button 
+        <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 rounded-xl bg-white/60 text-slate-600 hover:text-indigo-600 hover:bg-white shadow-sm border border-white/50 transition-colors"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100/80 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors active:scale-95"
         >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div 
-          className="md:hidden fixed inset-0 bg-slate-900/10 backdrop-blur-sm z-40 transition-opacity" 
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {/* ── Mobile Overlay ─────────────────────────────────────────────────── */}
+      <div
+        className={`md:hidden fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px] transition-opacity duration-300 ${
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsOpen(false)}
+      />
 
-      {/* Sidebar Content */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 transform md:relative md:translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
-        w-[280px] min-h-screen glass border-r border-slate-200/50 p-6 flex flex-col
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-      `}>
-        {/* Mobile Logo inside sidebar */}
-        <div className="md:hidden flex items-center gap-3 mb-8 mt-2 px-2">
+      {/* ── Sidebar Panel ──────────────────────────────────────────────────── */}
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 w-[260px]
+          md:relative md:w-[240px] md:translate-x-0 md:shrink-0
+          transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          flex flex-col min-h-screen
+          bg-white/70 backdrop-blur-2xl border-r border-black/[0.06]
+        `}
+      >
+        {/* ── Mobile Close Header ──────────────────────────────────────────── */}
+        <div className="md:hidden flex items-center justify-between px-5 pt-4 pb-2">
+          <div className="flex items-center gap-2.5">
             <Image
               src="/logo.png"
               alt="SmartAccess Logo"
-              width={40}
-              height={40}
-              className="rounded-full object-cover border-2 border-white shadow-sm -translate-y-0.5"
+              width={32}
+              height={32}
+              className="rounded-full object-cover ring-2 ring-white shadow-sm"
             />
-            <h2 className="text-lg font-bold text-slate-800 tracking-tight mt-1">
+            <span className="text-base font-bold text-slate-800 tracking-tight">
               Smart<span className="text-indigo-600">Access</span>
-            </h2>
+            </span>
+          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            aria-label="Close menu"
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        {/* Desktop Logo */}
-        <div className="hidden md:flex flex-col items-center mb-12 mt-6 space-y-4">
-          <div className="relative group">
-            <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+        {/* ── Desktop Logo ─────────────────────────────────────────────────── */}
+        <div className="hidden md:flex flex-col items-center pt-8 pb-10 px-5">
+          <div className="relative group mb-4">
+            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <Image
               src="/logo.png"
               alt="SmartAccess Logo"
-              width={85}
-              height={85}
-              className="relative rounded-full object-cover border-[3px] border-white shadow-sm"
+              width={72}
+              height={72}
+              className="relative rounded-full object-cover ring-[2.5px] ring-white shadow-md"
             />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+          <h1 className="text-xl font-bold tracking-tight text-slate-800">
             Smart<span className="text-indigo-600">Access</span>
           </h1>
+          <p className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider">
+            AI Audit Platform
+          </p>
         </div>
 
-        <div className="flex flex-col gap-2 relative">
-          <Link href="/" className={navItemClass(pathname === "/")}>
-            <FileText size={20} className={pathname === "/" ? "text-white" : "text-indigo-400"} />
-            Generate Report
-          </Link>
+        {/* ── Navigation ───────────────────────────────────────────────────── */}
+        <nav className="flex flex-col gap-1 px-4 mt-2 md:mt-0">
+          {navItems.map(({ href, label, Icon, isActive }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`
+                flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[15px]
+                transition-all duration-200
+                ${
+                  isActive
+                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20"
+                    : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 active:scale-[0.98]"
+                }
+              `}
+            >
+              <Icon
+                size={19}
+                className={isActive ? "text-white/90" : "text-slate-400"}
+                strokeWidth={isActive ? 2.2 : 1.8}
+              />
+              {label}
+            </Link>
+          ))}
+        </nav>
 
-          <Link
-            href="/reports"
-            className={navItemClass(
-              pathname === "/reports" || pathname.startsWith("/reports/")
-            )}
-          >
-            <FolderOpen size={20} className={pathname.startsWith("/reports/") || pathname === "/reports" ? "text-white" : "text-indigo-400"} />
-            My Reports
-          </Link>
-        </div>
-
-        <div className="mt-auto pb-4">
-          <div className="glass-card rounded-2xl p-4 text-center border-t border-slate-200/50 md:border-transparent">
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-              AI Audit Tool
+        {/* ── Footer ───────────────────────────────────────────────────────── */}
+        <div className="mt-auto px-5 pb-6 pt-4">
+          <div className="rounded-xl bg-slate-50/80 border border-black/[0.04] p-4 text-center">
+            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">
+              SmartAccess
             </p>
-            <div className="h-1 w-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full mx-auto mt-3"></div>
+            <div className="flex items-center justify-center gap-1.5 mt-2">
+              <div className="h-[3px] w-8 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full" />
+            </div>
+            <p className="text-[10px] text-slate-350 mt-2 text-slate-400">
+              v1.0 — AI Audit Tool
+            </p>
           </div>
         </div>
       </div>

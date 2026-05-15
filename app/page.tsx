@@ -1,12 +1,18 @@
 "use client";
 
-import { Upload, Sparkles, WifiOff } from "lucide-react";
+import { Upload, Sparkles, WifiOff, FileText, X as XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { submitAudit } from "../lib/api";
 import AuditLoadingOverlay from "../components/AuditLoadingOverlay";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
 
 export default function HomePage() {
   const router = useRouter();
@@ -17,6 +23,22 @@ export default function HomePage() {
   const [isHovering, setIsHovering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [backendOk, setBackendOk] = useState<boolean | null>(null);
+
+  // Generate preview URL for image files
+  const previewUrl = useMemo(() => {
+    if (!file) return null;
+    if (file.type.startsWith("image/")) {
+      return URL.createObjectURL(file);
+    }
+    return null;
+  }, [file]);
+
+  // Cleanup object URL on unmount or file change
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     fetch(`${API_URL}/health`)
@@ -39,7 +61,7 @@ export default function HomePage() {
       alert("Please select a location type.");
       return;
     }
- 
+
     if (!reportName.trim()) {
       alert("Please enter a report name.");
       return;
@@ -58,129 +80,174 @@ export default function HomePage() {
 
   return (
     <>
-    {isLoading && <AuditLoadingOverlay />}
-    <div className="p-6 md:p-10 max-w-6xl mx-auto">
-      {backendOk === false && (
-        <div className="mb-6 flex items-center gap-3 bg-rose-50 border border-rose-200 rounded-2xl px-5 py-4">
-          <WifiOff className="shrink-0 text-rose-500" size={20} />
-          <p className="text-rose-700 font-medium text-sm md:text-base">
-            Audit service unavailable — please try again later.
+      {isLoading && <AuditLoadingOverlay />}
+      <div className="p-5 sm:p-6 md:p-10 max-w-5xl mx-auto">
+
+        {/* Backend warning */}
+        {backendOk === false && (
+          <div className="mb-5 page-enter flex items-center gap-3 bg-red-50 border border-red-200/80 rounded-xl px-4 py-3.5">
+            <WifiOff className="shrink-0 text-red-500" size={18} />
+            <p className="text-red-700 font-medium text-sm">
+              Audit service unavailable — please try again later.
+            </p>
+          </div>
+        )}
+
+        {/* Page header */}
+        <div className="mb-6 md:mb-8 page-enter">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
+            Generate New Report
+          </h2>
+          <p className="text-slate-500 mt-1.5 text-sm md:text-[15px]">
+            Upload an image to start an accessibility audit.
           </p>
         </div>
-      )}
 
-      <div className="mb-6 md:mb-8 text-center md:text-left">
-        <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Generate New Report</h2>
-        <p className="text-slate-500 mt-2 text-md md:text-lg">Upload an image to start an accessibility audit.</p>
-      </div>
+        {/* Main card */}
+        <div className="glass-card rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-8 page-enter-delay-1">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6 lg:gap-10 items-stretch">
 
-      <div className="glass-card rounded-[24px] md:rounded-[32px] p-6 md:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 lg:gap-10 items-stretch">
-          <div className="flex flex-col">
-            <h3 className="text-lg font-semibold mb-1 text-slate-800">Source Material</h3>
-            <p className="text-slate-500 mb-4 md:mb-6 text-sm">
-              Upload the image or document you want to base the report on.
-            </p>
-
-            <div 
-              className={`flex-1 border-2 border-dashed rounded-[20px] md:rounded-[24px] flex flex-col items-center justify-center text-center px-4 py-8 md:px-6 transition-all duration-300 min-h-[300px] md:min-h-[460px] relative overflow-hidden group ${
-                isHovering ? "border-indigo-400 bg-indigo-50/50" : "border-slate-300 bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-300"
-              }`}
-              onDragOver={(e) => { e.preventDefault(); setIsHovering(true); }}
-              onDragLeave={() => setIsHovering(false)}
-              onDrop={(e) => { e.preventDefault(); setIsHovering(false); setFile(e.dataTransfer.files?.[0] || null); }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-100/20 to-purple-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 md:mb-6 relative z-10 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                <Upload className="text-indigo-500" size={28} />
-              </div>
-
-              <p className="text-lg md:text-xl font-medium text-slate-700 mb-2 relative z-10">Select or drop file</p>
-
-              <p className="text-xs md:text-sm text-slate-400 mb-6 md:mb-8 relative z-10 font-medium hidden sm:block">
-                SVG, PNG, JPG or PDF (max. 10MB)
+            {/* ── Upload area ──────────────────────────────────────────────── */}
+            <div className="flex flex-col">
+              <h3 className="text-base font-semibold mb-1 text-slate-800">Source Material</h3>
+              <p className="text-slate-400 mb-4 text-sm">
+                Upload the image or document for your audit.
               </p>
 
-              <input
-                type="file"
-                accept="image/jpeg,image/png,application/pdf"
-                id="fileUpload"
-                className="hidden"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
-
-              <label
-                htmlFor="fileUpload"
-                className="bg-white border border-slate-200 text-slate-700 px-6 py-2.5 rounded-full font-medium cursor-pointer hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200 relative z-10 text-sm md:text-base w-full sm:w-auto"
+              <div
+                className={`
+                  flex-1 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center
+                  text-center px-5 py-8 transition-all duration-300 relative overflow-hidden
+                  min-h-[260px] md:min-h-[380px] group cursor-pointer
+                  ${isHovering
+                    ? "border-indigo-400 bg-indigo-50/40"
+                    : "border-slate-200 bg-slate-50/40 hover:bg-slate-50/70 hover:border-slate-300"
+                  }
+                `}
+                onDragOver={(e) => { e.preventDefault(); setIsHovering(true); }}
+                onDragLeave={() => setIsHovering(false)}
+                onDrop={(e) => { e.preventDefault(); setIsHovering(false); setFile(e.dataTransfer.files?.[0] || null); }}
+                onClick={() => document.getElementById("fileUpload")?.click()}
               >
-                Browse Files
-              </label>
+                {/* Hover gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/10 to-violet-100/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-              {file && (
-                <div className="mt-6 px-4 py-2 bg-green-50 rounded-xl border border-green-100 relative z-10 flex items-center gap-2 max-w-[90%]">
-                  <div className="w-2 h-2 rounded-full bg-green-500 shrink-0"></div>
-                  <p className="text-sm text-green-700 font-medium truncate">
-                    {file.name}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-between">
-            <div>
-              <div className="mb-6 md:mb-8">
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Location Type <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={locationType}
-                    onChange={(e) => setLocationType(e.target.value)}
-                    className="w-full rounded-[16px] md:rounded-2xl border border-slate-200 bg-white/60 px-5 py-4 outline-none focus-ring text-slate-700 appearance-none shadow-sm cursor-pointer transition-all text-sm md:text-base"
-                  >
-                    <option value="" disabled>Select transportation type...</option>
-                    <option value="bus_stop">Bus Stop</option>
-                    <option value="tram_stop">Tram Stop</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-500">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                {file ? (
+                  /* ── File selected state ─────────────────────────────────── */
+                  <div className="relative z-10 flex flex-col items-center w-full">
+                    {previewUrl ? (
+                      /* Image preview */
+                      <div className="w-full max-w-[280px] md:max-w-[320px] mb-4 rounded-xl overflow-hidden border border-slate-200/80 shadow-sm">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={previewUrl}
+                          alt="Upload preview"
+                          className="w-full h-auto max-h-[200px] md:max-h-[280px] object-contain bg-white"
+                        />
+                      </div>
+                    ) : (
+                      /* PDF / non-image fallback icon */
+                      <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center mb-4 shadow-sm">
+                        <FileText className="text-emerald-600" size={24} />
+                      </div>
+                    )}
+                    <p className="text-base font-semibold text-slate-800 mb-1 max-w-[280px] truncate">
+                      {file.name}
+                    </p>
+                    <p className="text-xs text-slate-400 font-medium mb-4">
+                      {formatFileSize(file.size)}
+                    </p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-red-600 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-red-200 hover:bg-red-50 transition-all shadow-xs"
+                    >
+                      <XIcon size={13} />
+                      Remove
+                    </button>
                   </div>
-                </div>
-              </div>
+                ) : (
+                  /* ── Empty upload state ──────────────────────────────────── */
+                  <>
+                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center mb-4 shadow-sm relative z-10 group-hover:shadow-md group-hover:border-indigo-200 transition-all duration-300">
+                      <Upload className="text-indigo-500" size={24} />
+                    </div>
 
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Report Name <span className="text-red-500">*</span>
-                </label>
+                    <p className="text-base font-semibold text-slate-700 mb-1 relative z-10">
+                      Drop file here or browse
+                    </p>
+
+                    <p className="text-xs text-slate-400 relative z-10 font-medium">
+                      PNG, JPG or PDF — max 10 MB
+                    </p>
+                  </>
+                )}
+
                 <input
-                  value={reportName}
-                  onChange={(e) => setReportName(e.target.value)}
-                  className="w-full rounded-[16px] md:rounded-2xl border border-slate-200 bg-white/60 px-5 py-4 outline-none focus-ring text-slate-700 shadow-sm transition-all text-sm md:text-base"
-                  placeholder="E.g., Central Station Platform 2"
+                  type="file"
+                  accept="image/jpeg,image/png,application/pdf"
+                  id="fileUpload"
+                  className="hidden"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
                 />
               </div>
             </div>
 
-            <div className="pt-4 md:pt-8 mt-auto">
-              <button
-                onClick={handleGenerate}
-                disabled={isLoading}
-                className="w-full relative group overflow-hidden rounded-[16px] md:rounded-2xl p-[1px] shadow-sm hover:shadow-lg transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-[16px] md:rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-white/10 backdrop-blur-sm flex items-center justify-center gap-2 text-white font-semibold text-base md:text-lg px-8 py-3.5 md:py-4 rounded-[16px] md:rounded-2xl transition-transform duration-300 active:scale-95 group-hover:scale-[0.99] md:group-hover:scale-[0.98]">
-                  <Sparkles size={18} className="text-white/90" />
-                  <span>{isLoading ? "Running Audit..." : "Generate Report"}</span>
+            {/* ── Form area ────────────────────────────────────────────────── */}
+            <div className="flex flex-col justify-between">
+              <div>
+                {/* Location Type */}
+                <div className="mb-5">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Location Type <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={locationType}
+                      onChange={(e) => setLocationType(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3.5 outline-none focus-ring text-slate-700 appearance-none shadow-xs cursor-pointer transition-all text-sm"
+                    >
+                      <option value="" disabled>Select transportation type...</option>
+                      <option value="bus_stop">Bus Stop</option>
+                      <option value="tram_stop">Tram Stop</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                  </div>
                 </div>
-              </button>
-              <p className="text-center text-xs text-slate-400 mt-3 md:mt-4 font-medium hidden sm:block">Estimated AI processing time: ~45s</p>
+
+                {/* Report Name */}
+                <div className="mb-5">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Report Name <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    value={reportName}
+                    onChange={(e) => setReportName(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3.5 outline-none focus-ring text-slate-700 shadow-xs transition-all text-sm placeholder:text-slate-350"
+                    placeholder="E.g., Central Station Platform 2"
+                  />
+                </div>
+              </div>
+
+              {/* Generate button */}
+              <div className="pt-4 mt-auto">
+                <button
+                  onClick={handleGenerate}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[15px] px-6 py-3.5 md:py-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600"
+                >
+                  <Sparkles size={17} className="text-white/80" />
+                  {isLoading ? "Running Audit…" : "Generate Report"}
+                </button>
+                <p className="text-center text-xs text-slate-400 mt-3 font-medium">
+                  Estimated AI processing time: ~45s
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
