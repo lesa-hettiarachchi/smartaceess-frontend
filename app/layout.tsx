@@ -11,6 +11,10 @@ const outfit = Outfit({
 export const metadata = {
   title: "SmartAccess",
   description: "Accessibility AI Audit Tool",
+  icons: {
+    icon: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 export default function RootLayout({

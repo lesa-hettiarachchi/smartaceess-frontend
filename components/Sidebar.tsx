@@ -41,11 +41,11 @@ export default function Sidebar() {
       <div className="md:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
         <div className="flex items-center gap-2.5">
           <Image
-            src="/logo.png"
+            src="/logo.svg"
             alt="SmartAccess Logo"
-            width={34}
-            height={34}
-            className="rounded-full object-cover ring-2 ring-white shadow-sm"
+            width={32}
+            height={32}
+            className="object-contain"
           />
           <h1 className="text-lg font-bold tracking-tight text-slate-800">
             Smart<span className="text-indigo-600">Access</span>
@@ -62,9 +62,8 @@ export default function Sidebar() {
 
       {/* ── Mobile Overlay ─────────────────────────────────────────────────── */}
       <div
-        className={`md:hidden fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px] transition-opacity duration-300 ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`md:hidden fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px] transition-opacity duration-300 ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setIsOpen(false)}
       />
 
@@ -83,11 +82,11 @@ export default function Sidebar() {
         <div className="md:hidden flex items-center justify-between px-5 pt-4 pb-2">
           <div className="flex items-center gap-2.5">
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="SmartAccess Logo"
-              width={32}
-              height={32}
-              className="rounded-full object-cover ring-2 ring-white shadow-sm"
+              width={28}
+              height={28}
+              className="object-contain"
             />
             <span className="text-base font-bold text-slate-800 tracking-tight">
               Smart<span className="text-indigo-600">Access</span>
@@ -104,16 +103,13 @@ export default function Sidebar() {
 
         {/* ── Desktop Logo ─────────────────────────────────────────────────── */}
         <div className="hidden md:flex flex-col items-center pt-8 pb-10 px-5">
-          <div className="relative group mb-4">
-            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <Image
-              src="/logo.png"
-              alt="SmartAccess Logo"
-              width={72}
-              height={72}
-              className="relative rounded-full object-cover ring-[2.5px] ring-white shadow-md"
-            />
-          </div>
+          <Image
+            src="/logo.svg"
+            alt="SmartAccess Logo"
+            width={96}
+            height={96}
+            className="object-contain"
+          />
           <h1 className="text-xl font-bold tracking-tight text-slate-800">
             Smart<span className="text-indigo-600">Access</span>
           </h1>
@@ -131,10 +127,9 @@ export default function Sidebar() {
               className={`
                 flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[15px]
                 transition-all duration-200
-                ${
-                  isActive
-                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20"
-                    : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 active:scale-[0.98]"
+                ${isActive
+                  ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20"
+                  : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 active:scale-[0.98]"
                 }
               `}
             >
