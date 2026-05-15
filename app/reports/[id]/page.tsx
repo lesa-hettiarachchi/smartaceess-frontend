@@ -1,7 +1,10 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Check, TriangleAlert, X, ArrowLeft, ShieldAlert, ClipboardList } from "lucide-react";
 import Link from "next/link";
-import { getReport } from "../../../lib/api";
+import { getReport, type ReportDetail } from "../../../lib/api";
 
 function fmt(cls: string) {
   return cls.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
@@ -29,18 +32,50 @@ function fmtDate(iso: string) {
   }
 }
 
-export default async function ReportDetailsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default function ReportDetailsPage() {
+  const params = useParams();
+  const id = params.id as string;
 
-  let data: Awaited<ReturnType<typeof getReport>>;
-  try {
-    data = await getReport(id);
-  } catch {
-    notFound();
+  const [data, setData] = useState<ReportDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    getReport(id)
+      .then(setData)
+      .catch(() => setError(true))
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto">
+        <div className="space-y-4 page-enter">
+          <div className="skeleton h-8 w-48 rounded-lg" />
+          <div className="skeleton h-5 w-72 rounded-lg" />
+          <div className="skeleton h-64 w-full rounded-2xl mt-6" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto">
+        <Link
+          href="/reports"
+          className="inline-flex items-center gap-1.5 text-sm text-indigo-500 font-medium hover:text-indigo-600 mb-4 transition-colors"
+        >
+          <ArrowLeft size={15} /> Back to Reports
+        </Link>
+        <div className="glass-card rounded-2xl p-10 text-center">
+          <p className="text-lg font-semibold text-slate-700">Report not found</p>
+          <p className="text-sm text-slate-400 mt-2">
+            We couldn&apos;t load report #{id}. It may have been removed.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Classes in needs_inspection always show yellow — even if also in detected[].
