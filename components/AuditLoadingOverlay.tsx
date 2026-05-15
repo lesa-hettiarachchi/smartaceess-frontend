@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Upload, Cpu, ShieldCheck, FileText, Sparkles } from "lucide-react";
 
 // ── Stages ────────────────────────────────────────────────────────────────────
@@ -9,8 +9,7 @@ const STAGES = [
     Icon: Upload,
     label: "Uploading image",
     detail: "Preparing your image for analysis",
-    gradient: "from-blue-500 to-indigo-500",
-    ring: "bg-blue-400",
+    color: "bg-indigo-600",
     duration: 900,
     target: 10,
   },
@@ -18,8 +17,7 @@ const STAGES = [
     Icon: Cpu,
     label: "AI detection running",
     detail: "Scanning for accessibility features",
-    gradient: "from-violet-500 to-purple-500",
-    ring: "bg-violet-400",
+    color: "bg-violet-600",
     duration: 5000,
     target: 48,
   },
@@ -27,8 +25,7 @@ const STAGES = [
     Icon: ShieldCheck,
     label: "Mapping DSAPT clauses",
     detail: "Cross-referencing disability standards",
-    gradient: "from-indigo-500 to-blue-600",
-    ring: "bg-indigo-400",
+    color: "bg-indigo-600",
     duration: 3500,
     target: 72,
   },
@@ -36,8 +33,7 @@ const STAGES = [
     Icon: FileText,
     label: "Building audit report",
     detail: "Structuring your accessibility findings",
-    gradient: "from-blue-500 to-cyan-500",
-    ring: "bg-blue-400",
+    color: "bg-blue-600",
     duration: 2500,
     target: 89,
   },
@@ -45,8 +41,7 @@ const STAGES = [
     Icon: Sparkles,
     label: "Almost there",
     detail: "Generating PDF and finalising",
-    gradient: "from-emerald-500 to-teal-500",
-    ring: "bg-emerald-400",
+    color: "bg-emerald-600",
     duration: 99999, // stays until API responds
     target: 97,
   },
@@ -85,7 +80,7 @@ export default function AuditLoadingOverlay() {
     const id = setInterval(() => {
       setProgress(prev => {
         if (prev >= target) return prev;
-        const step = Math.max(0.2, (target - prev) * 0.035);
+        const step = Math.max(0.15, (target - prev) * 0.03);
         return Math.min(prev + step, target);
       });
     }, 50);
@@ -107,62 +102,57 @@ export default function AuditLoadingOverlay() {
       className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ${
         fadeIn ? "opacity-100" : "opacity-0"
       }`}
-      style={{ background: "rgba(15, 23, 42, 0.55)", backdropFilter: "blur(8px)" }}
+      style={{ background: "rgba(8, 12, 28, 0.6)", backdropFilter: "blur(12px)" }}
     >
       {/* Card */}
-      <div className="glass-card rounded-[32px] p-8 md:p-12 w-[340px] md:w-[420px] flex flex-col items-center text-center shadow-2xl">
+      <div className="glass-card rounded-2xl md:rounded-3xl p-7 md:p-10 w-[320px] md:w-[400px] flex flex-col items-center text-center shadow-xl mx-4">
 
         {/* ── Animated icon ────────────────────────────────────────────────── */}
-        <div className="relative w-28 h-28 mb-8 flex items-center justify-center">
+        <div className="relative w-20 h-20 md:w-24 md:h-24 mb-7 flex items-center justify-center">
 
-          {/* Outer slow ping */}
+          {/* Rotating ring */}
           <div
-            className={`absolute inset-0 rounded-full ${stage.ring} opacity-20 animate-ping`}
-            style={{ animationDuration: "2.2s" }}
-          />
-          {/* Mid ping — offset */}
-          <div
-            className={`absolute inset-3 rounded-full ${stage.ring} opacity-15 animate-ping`}
-            style={{ animationDuration: "2.2s", animationDelay: "0.55s" }}
-          />
-
-          {/* Rotating gradient ring */}
-          <div
-            className="absolute inset-1 rounded-full animate-spin"
+            className="absolute inset-0 rounded-full animate-spin"
             style={{
               animationDuration: "3s",
-              background: `conic-gradient(transparent 60%, rgba(99,102,241,0.6) 100%)`,
+              background: `conic-gradient(transparent 60%, rgba(99,102,241,0.5) 100%)`,
             }}
+          />
+
+          {/* Pulse */}
+          <div
+            className="absolute inset-2 rounded-full bg-indigo-400 opacity-15 animate-ping"
+            style={{ animationDuration: "2.2s" }}
           />
 
           {/* Icon circle */}
           <div
-            className={`relative w-[68px] h-[68px] rounded-full bg-gradient-to-br ${stage.gradient} flex items-center justify-center shadow-xl transition-all duration-700`}
+            className={`relative w-14 h-14 md:w-16 md:h-16 rounded-2xl ${stage.color} flex items-center justify-center shadow-lg transition-all duration-700`}
           >
-            <Icon className="text-white drop-shadow" size={28} />
+            <Icon className="text-white drop-shadow" size={24} />
           </div>
         </div>
 
         {/* ── Stage text ───────────────────────────────────────────────────── */}
-        <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-2 transition-all duration-500">
+        <h3 className="text-lg md:text-xl font-bold text-slate-800 mb-1 transition-all duration-500">
           {stage.label}
           <span className="text-indigo-500">{dots}</span>
         </h3>
-        <p className="text-sm text-slate-500 mb-8 leading-relaxed transition-all duration-500">
+        <p className="text-sm text-slate-400 mb-7 leading-relaxed transition-all duration-500">
           {stage.detail}
         </p>
 
         {/* ── Step pip indicators ──────────────────────────────────────────── */}
-        <div className="flex items-center gap-2 mb-7">
+        <div className="flex items-center gap-1.5 mb-6">
           {STAGES.map((_, i) => (
             <div
               key={i}
               className={`rounded-full transition-all duration-500 ease-out ${
                 i === stageIdx
-                  ? "w-6 h-2.5 bg-indigo-500"
+                  ? "w-5 h-2 bg-indigo-500"
                   : i < stageIdx
-                  ? "w-2.5 h-2.5 bg-indigo-300"
-                  : "w-2.5 h-2.5 bg-slate-200"
+                  ? "w-2 h-2 bg-indigo-300"
+                  : "w-2 h-2 bg-slate-200"
               }`}
             />
           ))}
@@ -171,15 +161,12 @@ export default function AuditLoadingOverlay() {
         {/* ── Progress bar ─────────────────────────────────────────────────── */}
         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full rounded-full transition-all duration-300 ease-out"
-            style={{
-              width: `${progress}%`,
-              background: "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)",
-            }}
+            className="h-full rounded-full transition-all duration-300 ease-out bg-indigo-500"
+            style={{ width: `${progress}%` }}
           />
         </div>
 
-        <p className="text-xs text-slate-400 mt-2.5 font-semibold tracking-wide">
+        <p className="text-[11px] text-slate-400 mt-2 font-semibold tracking-wide tabular-nums">
           {Math.round(progress)}% complete
         </p>
       </div>
