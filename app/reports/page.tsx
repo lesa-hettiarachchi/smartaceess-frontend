@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Download, TriangleAlert, FileSymlink, ChevronRight, FolderOpen } from "lucide-react";
 import { getReports, type ReportSummary } from "../../lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = "/api/proxy";
 
 /* ── Skeleton card for loading state ─────────────────────────────────────── */
 function ReportSkeleton() {

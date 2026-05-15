@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { submitAudit } from "../lib/api";
 import AuditLoadingOverlay from "../components/AuditLoadingOverlay";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = "/api/proxy";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + " B";

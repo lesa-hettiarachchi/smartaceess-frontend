@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = "/api/proxy";
 
 // This file defines TypeScript types and API functions for interacting with the backend service.
 export type ReportSummary = {
