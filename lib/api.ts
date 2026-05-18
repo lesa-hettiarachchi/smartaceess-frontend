@@ -1,4 +1,11 @@
-const API_URL = "/api/proxy";
+// Server Components (Node.js) cannot use relative URLs — they need the full
+// backend origin.  Client Components run in the browser and must go through
+// the Next.js rewrite proxy (/api/proxy) to avoid CORS issues.
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+const API_URL =
+  typeof window === "undefined" ? BACKEND_URL : "/api/proxy";
 
 // This file defines TypeScript types and API functions for interacting with the backend service.
 export type ReportSummary = {
